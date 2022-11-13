@@ -9,4 +9,6 @@
     <dimen name="spacing_32">32dp</dimen>
 
     <dimen name="title_text_size">18sp</dimen>
+    <dimen name="spacing_12">12dp</dimen>
+    <dimen name="spacing_2">2dp</dimen>
 </resources>
