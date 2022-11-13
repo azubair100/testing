@@ -11,6 +11,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zubair.test.databinding.ActivityMainBinding
+import com.zubair.test.util.buildErrorDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 
@@ -33,27 +34,46 @@ class MainActivity : AppCompatActivity() {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.bookState.collectLatest { state ->
                     when (state.currentState) {
-                        is MainViewModel.BookState.BookLoadingState -> handleViewVisibility(showProgressbar = true)
-                        is MainViewModel.BookState.EmptyList -> handleViewVisibility(showEmptyListText = true)
-
+                        is MainViewModel.BookState.BookLoadingState -> handleViewVisibility(
+                            showProgressbar = true
+                        )
+                        is MainViewModel.BookState.EmptyList -> handleViewVisibility(
+                            showEmptyListText = true
+                        )
                         is MainViewModel.BookState.BookList -> {
                             handleViewVisibility(showList = true)
                             (binding.recyclerView.adapter as BookAdapter).submitList(
                                 (state.currentState as MainViewModel.BookState.BookList).list
                             )
                         }
-                        else -> {}
+                        else -> handleViewVisibility()
                     }
 
                 }
             }
         }
+
+        lifecycleScope.launchWhenStarted {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.bookErrorState.collectLatest { state ->
+
+                    when (state.currentState) {
+                        is MainViewModel.BookState.ErrorState -> {
+                            this@MainActivity.buildErrorDialog()
+                        }
+                        else -> {}
+                    }
+                }
+            }
+        }
+
+
     }
 
     private fun setUpSearchView() {
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                if(!binding.searchView.query.isNullOrEmpty()) {
+                if (!binding.searchView.query.isNullOrEmpty()) {
                     viewModel.searchBook(query!!)
                 }
                 return false
@@ -78,7 +98,7 @@ class MainActivity : AppCompatActivity() {
         showEmptyListText: Boolean = false,
         showProgressbar: Boolean = false
     ) {
-        with (binding) {
+        with(binding) {
             recyclerView.isVisible = showList
             progressbarList.isVisible = showProgressbar
             emptyListText.isVisible = showEmptyListText

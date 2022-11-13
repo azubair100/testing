@@ -6,16 +6,18 @@ import androidx.lifecycle.viewModelScope
 import com.zubair.test.model.Book
 import com.zubair.test.network.BookRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(private val repository: BookRepository) : ViewModel() {
+
     private val _bookState = MutableStateFlow(ScreenState())
     val bookState = _bookState.asStateFlow()
+
+    private val _bookErrorState = MutableSharedFlow<ScreenState>()
+    val bookErrorState = _bookErrorState.asSharedFlow()
 
     fun searchBook(query: String) {
         viewModelScope.launch {
@@ -31,7 +33,8 @@ class MainViewModel @Inject constructor(private val repository: BookRepository) 
                 }
 
             } catch (error: Throwable) {
-                _bookState.emit(ScreenState(BookState.ErrorState))
+                _bookState.emit(ScreenState())
+                _bookErrorState.emit(ScreenState(BookState.ErrorState))
                 Log.e("error", "Error occurred ${error.localizedMessage}")
             }
         }

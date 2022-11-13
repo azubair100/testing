@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Test</string>
+    <string name="no_results_found_try_a_different_name">No results found! Try a different name.</string>
+    <string name="error_alert_title">Error Alert!</string>
+    <string name="error_alert_message">The request failed. Please try again.</string>
+    <string name="ok">Ok</string>
 </resources>
